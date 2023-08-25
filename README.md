@@ -1,12 +1,18 @@
 # edu-openehr-archetypes
+
 openEHR archetypes in software: examples for CaboLabs' training courses
 
-```
-$ gradle run --args="archetypes parse INPUTDIR=../openEHR-ADL/lib/src/test/resources/archetypes/entry/observation/openEHR-EHR-OBSERVATION.blood_pressure.v1.adl"
+## Run from Gradle
 
-> Task :app:run FAILED
-Unmatched argument at index 0: 'archetypes'
-Did you mean: archetypes parse?
+```shell
+$ gradle build
+$ gradle run --args="parse ../openEHR-ADL/lib/src/test/resources/archetypes/entry/observation/openEHR-EHR-OBSERVATION.blood_pressure.v1.adl"
 ```
 
-TODO: create fatjar and run from .sh ?
+## Run from fat JAR
+
+```shell
+$ gradle build
+$ gradle fatJar
+$ java -jar app/build/libs/edu-openehr-archetypes-0.1-all.jar parse ../openEHR-ADL/lib/src/test/resources/archetypes/entry/observation/openEHR-EHR-OBSERVATION.blood_pressure.v1.adl
+```

@@ -26,9 +26,9 @@ class App {
       description = 'Parses a given archetype in ADL format'
    )
    public void parseCommand(
-      @Parameters(arity = "1", paramLabel = "INPUTDIR") Path inputDir
+      @Parameters(arity = "1") Path pathToADL
    )
    {
-      println "parse archetype $inputDir"
+      println "parse archetype $pathToADL"
    }
 }

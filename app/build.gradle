@@ -45,6 +45,26 @@ application {
     mainClass = 'com.cabolabs.edu.openehr.archetypes.App'
 }
 
+jar {
+    manifest {
+        attributes 'Main-Class': 'com.cabolabs.edu.openehr.archetypes.App'
+    }
+}
+
+task fatJar(type: Jar) {
+    manifest.from jar.manifest
+    classifier = 'all'
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+    from {
+        configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) }
+    } {
+        exclude "META-INF/*.SF"
+        exclude "META-INF/*.DSA"
+        exclude "META-INF/*.RSA"
+    }
+    with jar
+}
+
 tasks.named('test') {
     // Use JUnit Platform for unit tests.
     useJUnitPlatform()
