@@ -9,14 +9,12 @@ import picocli.CommandLine.Option
 import picocli.CommandLine.Parameters
 import java.nio.file.Path
 
-@Command(name = 'archetypes')
+@Command
 class App {
-   // String getGreeting() {
-   //    return 'Hello World!'
-   // }
 
-   static void main(String[] args) {
-      //println new App().greeting
+   static void main(String[] args)
+   {
+      //println "CWD "+ System.getProperty("user.dir")
       int rc = new CommandLine(new App()).execute(args)
       System.exit(rc)
    }
@@ -29,6 +27,25 @@ class App {
       @Parameters(arity = "1") Path pathToADL
    )
    {
-      println "parse archetype $pathToADL"
+      //println "parse archetype $pathToADL"
+      def archetype = Services.parse(pathToADL)
+
+      if (archetype)
+      {
+         println "Archetype parsed correctly."
+         println "Archetype ID = "+ archetype.archetypeId
+         println "Concept = "+ archetype.ontology.termDefinition('en', 'at0000')?.text
+      }
+   }
+
+   @Command(
+      name = 'traverse',
+      description = 'Traverses a given archetype in ADL format'
+   )
+   public void traverseCommand(
+      @Parameters(arity = "1") Path pathToADL
+   )
+   {
+      def archetype = Services.traverse(pathToADL)
    }
 }
