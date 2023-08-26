@@ -61,13 +61,20 @@ class Services {
          "Interval\t" + (delegate.lower != null ? delegate.lower.toString() : '*') +'..'+ (delegate.upper != null ? delegate.upper.toString() : '*')
       }
 
-      Services.Traverse traverse = new Services.Traverse()
-      traverse.run(archetype.definition)
+      Services.Traverse traverse = new Services.Traverse(archetype)
+      //traverse.run(archetype.definition)
    }
 
    static class Traverse {
 
       int level = 0
+      Archetype archetype
+
+      Traverse(Archetype archetype)
+      {
+         this.archetype = archetype
+         run(archetype.definition)
+      }
 
       def indent(boolean last = false)
       {
@@ -175,7 +182,7 @@ class Services {
       def run(CComplexObject o)
       {
          //println o.getClass().getSimpleName() +"\t"+ o.rmTypeName.padLeft(15) +"\t"+ o.path()
-         println indent() + o.rmTypeName +': '+ o.path()
+         println indent() + o.rmTypeName + nodeName(o) + ': '+ o.path()
          o.attributes.each {
             level ++
             run(it)
@@ -187,11 +194,22 @@ class Services {
       {
          //println a.getClass().getSimpleName() +"\t"+ a.rmAttributeName.padLeft(15) +"\t"+ a.path()
          println indent() + a.rmAttributeName +": "+ a.path()
-         a.children.each{
+         a.children.each {
             level++
             run(it)
             level --
          }
+      }
+
+      String nodeName(CObject c)
+      {
+         if (!c.nodeId) return ''
+
+         def term = archetype.ontology.termDefinition(archetype.originalLanguage.codeString, c.nodeId)
+
+         if (!term) return ''
+
+         ' ('+ term?.text +')'
       }
    }
 

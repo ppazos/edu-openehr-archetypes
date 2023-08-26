@@ -34,7 +34,7 @@ class App {
       {
          println "Archetype parsed correctly."
          println "Archetype ID = "+ archetype.archetypeId
-         println "Concept = "+ archetype.ontology.termDefinition('en', 'at0000')?.text
+         println "Concept = "+ archetype.getConceptName('en')?.text
       }
    }
 
