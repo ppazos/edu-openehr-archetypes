@@ -48,4 +48,23 @@ class App {
    {
       def archetype = Services.traverse(pathToADL)
    }
+
+   // TODO: print all ontology in the orgininal language
+
+   // TODO: pedir nodo por Path
+
+   // TODO: validar datos contra arquetipo/path, los datos hardcoded (el arquetipo tambien debe estar en el proyecto como un resource), es solo para mostrar la idea de validacion de datos con arquetipos
+
+
+   @Command(
+      name = 'constraint',
+      description = 'Show constraint at path from a given archetype'
+   )
+   public void constraintAtPathCommand(
+      @Parameters(arity = "1") Path pathToADL,
+      @Parameters(arity = "1") String archetypePath
+   )
+   {
+      Services.render(pathToADL, archetypePath)
+   }
 }
