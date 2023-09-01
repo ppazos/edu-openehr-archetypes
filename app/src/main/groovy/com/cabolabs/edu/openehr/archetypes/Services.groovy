@@ -72,18 +72,59 @@ class Services {
    {
       archetype = parse(pathToADL)
 
-      ArchetypeConstraint c = archetype.node(archetypePath)
-
-      if (!c)
-      {
-         throw new Exception("There is no constraint at the given path ${archetypePath} on ${archetype.archetypeId.value}")
-      }
+      ArchetypeConstraint c = getConstraint(archetype, archetypePath)
 
       Services.ConstraintRender render = new Services.ConstraintRender()
       render.render(c)
    }
 
-   // common util method
+   static boolean validate(Path pathToADL, String archetypePath, String data)
+   {
+      archetype = parse(pathToADL)
+      ArchetypeConstraint c = Services.getConstraint(archetype, archetypePath)
+
+      println c.class.simpleName
+      if (!(c instanceof CDomainType) && !(c instanceof CPrimitiveObject))
+      {
+         println "Only domain and primitive constraints are allowed"
+      }
+
+      switch(c)
+      {
+         case CDvQuantity: // data=magnitude|units
+
+            // parse data
+            def parts = data.split("\\|")
+            Double magnitude = new Double(parts[0])
+            String units = parts[1]
+
+            if (c.list.size() > 0)
+            {
+               def item = c.list.find { it.units == units }
+
+               if (!item)
+               {
+                  return false // "units '${units}' don't match "+ list.units)
+               }
+
+               if (item.magnitude && !item.magnitude.has(magnitude))
+               {
+                  return false // "magnitude ${magnitude} is not in the interval "+ item.magnitude)
+               }
+            }
+
+            return true
+
+         break
+         case CDvOrdinal:
+         break
+      }
+
+      return true
+   }
+
+   // common util methods
+
    static String nodeName(CObject c)
    {
       if (!c.nodeId) return ''
@@ -93,6 +134,18 @@ class Services {
       if (!term) return ''
 
       ' ('+ term?.text +')'
+   }
+
+   static ArchetypeConstraint getConstraint(Archetype archetype, String path)
+   {
+      ArchetypeConstraint c = archetype.node(path)
+
+      if (!c)
+      {
+         throw new Exception("There is no constraint at the given path ${path} on ${archetype.archetypeId.value}")
+      }
+
+      return c
    }
 
    static class Traverse {

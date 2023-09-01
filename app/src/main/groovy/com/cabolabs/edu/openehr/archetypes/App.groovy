@@ -51,7 +51,6 @@ class App {
 
    // TODO: print all ontology in the orgininal language
 
-   // TODO: pedir nodo por Path
 
    // TODO: validar datos contra arquetipo/path, los datos hardcoded (el arquetipo tambien debe estar en el proyecto como un resource), es solo para mostrar la idea de validacion de datos con arquetipos
 
@@ -66,5 +65,20 @@ class App {
    )
    {
       Services.render(pathToADL, archetypePath)
+   }
+
+
+
+   @Command(
+      name = 'validate',
+      description = 'Validates some data against a given archetype and path'
+   )
+   public void dataValidateCommand(
+      @Parameters(arity = "1") Path pathToADL,
+      @Parameters(arity = "1") String archetypePath,
+      @Parameters(arity = "1") String data
+   )
+   {
+      println Services.validate(pathToADL, archetypePath, data)
    }
 }
