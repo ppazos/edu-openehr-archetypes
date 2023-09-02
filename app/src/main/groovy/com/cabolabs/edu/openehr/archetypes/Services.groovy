@@ -8,6 +8,7 @@ import org.openehr.am.archetype.constraintmodel.*
 import org.openehr.am.archetype.constraintmodel.primitive.*
 import org.openehr.am.openehrprofile.datatypes.quantity.CDvQuantity
 import org.openehr.am.openehrprofile.datatypes.quantity.CDvOrdinal
+import org.openehr.am.openehrprofile.datatypes.quantity.Ordinal
 import org.openehr.am.openehrprofile.datatypes.text.CCodePhrase
 import org.openehr.rm.support.basic.Interval
 
@@ -84,9 +85,14 @@ class Services {
       ArchetypeConstraint c = Services.getConstraint(archetype, archetypePath)
 
       println c.class.simpleName
-      if (!(c instanceof CDomainType) && !(c instanceof CPrimitiveObject))
+      println c.rmTypeName
+
+      // NOTE: if the constraint is open (any allowed) the AOM type could be CComplexObject
+      // without any children, so we need to allow that by checking the rmTypeName is a data value.
+      if (!isDataValue(c.rmTypeName) && !(c instanceof CDomainType) && !(c instanceof CPrimitiveObject))
       {
-         println "Only domain and primitive constraints are allowed"
+         println "Only domain and primitive constraints are allowed "+ c.class.simpleName +" given for type "+ c.rmTypeName
+         return false
       }
 
       switch(c)
@@ -95,6 +101,11 @@ class Services {
 
             // parse data
             def parts = data.split("\\|")
+            if (parts.size() < 2)
+            {
+               throw new Exception("Can't parse DV_QUANTITY it should be in the format 'magnitude|units'")
+            }
+
             Double magnitude = new Double(parts[0])
             String units = parts[1]
 
@@ -116,8 +127,91 @@ class Services {
             return true
 
          break
-         case CDvOrdinal:
+         case CDvOrdinal: // `value` or `terminology::code` or `value|terminology::code`
+
+            // parse data
+            if (data.contains("|")) // value|terminology::code
+            {
+               def parts = data.split("\\|")
+               int value = new Integer(parts[0])
+
+               if (!parts[1].contains("::"))
+               {
+                  throw new Exception("CodePhrase data should be formatted like this: terminology::code")
+               }
+
+               def term_code = parts[1].split("::")
+
+               def terminology_id = term_code[0]
+               def code = term_code[1]
+
+               if (!c.list) return true // any allowed
+
+               // NOTE: all the values should match
+               Ordinal item = c.list.find{
+                  it.value == value && it.symbol.codeString == code && it.symbol.terminologyId.value == terminology_id
+               }
+
+               if (!item) return false // "value ${value} is not valid"
+            }
+            else if (data.contains(":")) // code::terminology
+            {
+               if (!data.contains("::"))
+               {
+                  throw new Exception("CodePhrase data should be formatted like this: terminology::code")
+               }
+
+               def term_code = data.split("::")
+
+               def terminology_id = term_code[0]
+               def code = term_code[1]
+
+               Ordinal item = c.list.find{
+                  it.symbol.codeString == code && it.symbol.terminologyId.value == terminology_id
+               }
+
+               if (!item) return false // "value ${value} is not valid"
+            }
+            else // value (number)
+            {
+               int value = new Integer(data)
+
+               Ordinal item = c.list.find{
+                  it.value == value
+               }
+
+               if (!item) return false // "value ${value} is not valid"
+            }
+
          break
+         case CCodePhrase: // terminology::code
+
+            if (!data.contains("::"))
+            {
+               throw new Exception("CodePhrase data should be formatted like this: terminology::code")
+            }
+
+            def term_code = data.split("::")
+
+            def terminology_id = term_code[0]
+            def code = term_code[1]
+
+            c.terminologyId.value
+            c.codeList
+
+            if (c.terminologyId.value != terminology_id) return false
+
+            if (!c.codeList.find { it == code }) return false
+
+         break
+         // TODO: primitives
+         default: // c is CComplexObject
+            if (c.attributes)
+            {
+               println "CComplexObject detected with attributes, can't use this node to validate"
+               return false
+            }
+            // if it doesn't have attributes == any allowed
       }
 
       return true
@@ -134,6 +228,17 @@ class Services {
       if (!term) return ''
 
       ' ('+ term?.text +')'
+   }
+
+   static boolean isDataValue(String rmTypeName)
+   {
+      // NOTE: some DV's are missing, this is just for teaching, for completeness those types should be added.
+      [
+         'DV_TEXT', 'DV_CODED_TEXT', 'DV_QUANTITY', 'DV_COUNT',
+         'DV_ORDINAL', 'DV_TIME', 'DV_DATE', 'DV_DATE_TIME', 'DV_PROPORTION',
+         'DV_DURATION', 'DV_BOOLEAN', 'DV_IDENTIFIER', 'DV_MULTIMEDIA', 'DV_PARSABLE',
+         'DV_URI'
+      ].contains(rmTypeName)
    }
 
    static ArchetypeConstraint getConstraint(Archetype archetype, String path)

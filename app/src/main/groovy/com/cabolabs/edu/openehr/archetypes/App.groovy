@@ -80,5 +80,6 @@ class App {
    )
    {
       println Services.validate(pathToADL, archetypePath, data)
+      println data
    }
 }
