@@ -196,9 +196,6 @@ class Services {
             def terminology_id = term_code[0]
             def code = term_code[1]
 
-            c.terminologyId.value
-            c.codeList
-
             if (c.terminologyId.value != terminology_id) return false
 
             if (!c.codeList.find { it == code }) return false

@@ -52,9 +52,6 @@ class App {
    // TODO: print all ontology in the orgininal language
 
 
-   // TODO: validar datos contra arquetipo/path, los datos hardcoded (el arquetipo tambien debe estar en el proyecto como un resource), es solo para mostrar la idea de validacion de datos con arquetipos
-
-
    @Command(
       name = 'constraint',
       description = 'Show constraint at path from a given archetype'
@@ -66,8 +63,6 @@ class App {
    {
       Services.render(pathToADL, archetypePath)
    }
-
-
 
    @Command(
       name = 'validate',
