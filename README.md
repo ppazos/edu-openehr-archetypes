@@ -6,7 +6,6 @@ openEHR archetypes in software: examples for CaboLabs' training courses
 
 ```shell
 $ gradle build
-$ gradle fatJar
 ```
 
 ## Run from Gradle
@@ -46,10 +45,71 @@ NOTE 2: since a data set should be given, and each data value has different attr
 $ gradle run --args="validate src/test/resources/archetypes/openEHR-EHR-OBSERVATION.blood_pressure.v2.adl /protocol[at0011]/items[at1038]/value 'hello hello'"
 ```
 
+
 ## Run from fat JAR
 
+### Build fat jar
+
 ```shell
-$ gradle build
 $ gradle fatJar
-$ java -jar app/build/libs/edu-openehr-archetypes-0.1-all.jar parse ../openEHR-ADL/lib/src/test/resources/archetypes/entry/observation/openEHR-EHR-OBSERVATION.blood_pressure.v1.adl
+```
+
+### Try parsing archetypes
+
+```shell
+$ java -jar app/build/libs/edu-openehr-archetypes-0.1-all.jar parse app/src/test/resources/archetypes/openEHR-EHR-OBSERVATION.blood_pressure.v2.adl
+
+$ java -jar app/build/libs/edu-openehr-archetypes-0.1-all.jar parse app/src/test/resources/archetypes/openEHR-EHR-OBSERVATION.pulse.v2.adl
+```
+
+### Show internal structure with paths
+
+```shell
+$ java -jar app/build/libs/edu-openehr-archetypes-0.1-all.jar traverse app/src/test/resources/archetypes/openEHR-EHR-OBSERVATION.pulse.v2.adl
+
+$ java -jar app/build/libs/edu-openehr-archetypes-0.1-all.jar traverse app/src/test/resources/archetypes/openEHR-EHR-OBSERVATION.chest_circumference.v0.adl
+```
+
+### Show constraint at path
+
+```shell
+$ java -jar app/build/libs/edu-openehr-archetypes-0.1-all.jar constraint app/src/test/resources/archetypes/openEHR-EHR-OBSERVATION.chest_circumference.v0.adl /data[at0001]/events[at0014]/math_function/defining_codeCODE_PHRASE <CCodePhrase>
+
+$ java -jar app/build/libs/edu-openehr-archetypes-0.1-all.jar constraint app/src/test/resources/archetypes/openEHR-EHR-OBSERVATION.pulse.v2.adl /data[at0002]/events[at0003]/data[at0001]/items[at0004]/value
+```
+
+### Data validation
+
+```shell
+$ java -jar app/build/libs/edu-openehr-archetypes-0.1-all.jar validate app/src/test/resources/archetypes/openEHR-EHR-OBSERVATION.chest_circumference.v0.adl /data[at0001]/events[at0014]/math_function/defining_code openehr::147
+```
+
+
+## Run from Docker
+
+### Build image
+
+```shell
+$ docker build -t archetypes .
+```
+
+### Run container
+
+```shell
+$ docker run -d -t archetypes
+```
+
+### Get container ID (f06838afdb71)
+
+```shell
+$ docker ps
+
+CONTAINER ID   IMAGE                           COMMAND                  CREATED         STATUS         PORTS                                                                                            NAMES
+f06838afdb71   archetypes                      "/__cacert_entrypoin…"   9 minutes ago   Up 9 minutes                                                                                                    reverent_booth
+```
+
+### Run command using container ID
+
+```shell
+$ docker exec f06838afdb71 java -jar archetypes/app/build/libs/edu-openehr-archetypes-0.1-all.jar parse /archetypes/app/src/test/resources/archetypes/openEHR-EHR-OBSERVATION.blood_pressure.v2.adl
 ```

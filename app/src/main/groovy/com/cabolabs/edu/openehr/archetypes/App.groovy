@@ -19,6 +19,7 @@ class App {
       System.exit(rc)
    }
 
+
    @Command(
       name = 'parse',
       description = 'Parses a given archetype in ADL format'
@@ -34,9 +35,10 @@ class App {
       {
          println "Archetype parsed correctly."
          println "Archetype ID = "+ archetype.archetypeId
-         println "Concept = "+ archetype.getConceptName('en')?.text
+         println "Concept = "+ archetype.getConceptName(archetype.getOriginalLanguage().getCodeString())
       }
    }
+
 
    @Command(
       name = 'traverse',
@@ -48,6 +50,7 @@ class App {
    {
       def archetype = Services.traverse(pathToADL)
    }
+
 
    // TODO: print all ontology in the orgininal language
 
@@ -63,6 +66,7 @@ class App {
    {
       Services.render(pathToADL, archetypePath)
    }
+
 
    @Command(
       name = 'validate',

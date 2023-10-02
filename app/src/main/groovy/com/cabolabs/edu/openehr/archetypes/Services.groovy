@@ -84,8 +84,8 @@ class Services {
       archetype = parse(pathToADL)
       ArchetypeConstraint c = Services.getConstraint(archetype, archetypePath)
 
-      println c.class.simpleName
-      println c.rmTypeName
+      // println c.class.simpleName // CCodePhrase
+      // println c.rmTypeName // CODE_PHRASE
 
       // NOTE: if the constraint is open (any allowed) the AOM type could be CComplexObject
       // without any children, so we need to allow that by checking the rmTypeName is a data value.
